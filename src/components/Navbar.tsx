@@ -1,4 +1,4 @@
-import { BellIcon, SearchIcon } from 'lucide-react';
+// import { BellIcon } from 'lucide-react';
 
 interface NavbarProps {
   pageTitle: string;
@@ -40,7 +40,7 @@ const Navbar = ({ pageTitle, onToggleSidebar }: NavbarProps) => {
       </div>
 
       {/* Tengah: Search Bar (visible on medium screens and up) */}
-      <div className="hidden md:flex relative mx-4 flex-1 max-w-md">
+      {/* <div className="hidden md:flex relative mx-4 flex-1 max-w-md">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <SearchIcon className="h-5 w-5 text-gray-400" />
         </div>
@@ -49,10 +49,10 @@ const Navbar = ({ pageTitle, onToggleSidebar }: NavbarProps) => {
           placeholder="Search..."
           className="pl-10 pr-4 py-2 w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
         />
-      </div>
+      </div> */}
 
       {/* Pojok Kanan: Notifikasi dan Profile User */}
-      <div className="flex items-center space-x-4">
+      {/* <div className="flex items-center space-x-4">
         <button className="p-2 rounded-full hover:bg-gray-100 relative">
           <BellIcon className="h-6 w-6 text-gray-600" />
           <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
@@ -71,7 +71,7 @@ const Navbar = ({ pageTitle, onToggleSidebar }: NavbarProps) => {
             <span className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></span>
           </div>
         </div>
-      </div>
+      </div> */}
     </nav>
   );
 };

@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { TrendingUpIcon, TrendingDownIcon, Activity, Users, Package, DollarSign, ShoppingCart } from 'lucide-react';
+import { 
+  Users,         
+  BookOpen,      
+  School,         
+  NotebookPen,    
+  CalendarDays,  
+  GraduationCap,  
+  TrendingUpIcon,
+  TrendingDownIcon
+} from 'lucide-react';
+
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 
-// Komponen DashboardCard yang ditingkatkan
+
 interface DashboardCardProps {
   title: string;
   count: number;
@@ -44,85 +54,79 @@ const DashboardCard = ({ title, count, icon, trend = 0, color, link }: Dashboard
   );
 };
 
-// Komponen TopProducts
-const TopProducts = () => {
-  return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-lg font-semibold mb-4">Top Products</h2>
-      <div className="space-y-4">
-        {[
-          { name: 'Product A', sales: 342, percentage: 65 },
-          { name: 'Product B', sales: 276, percentage: 52 },
-          { name: 'Product C', sales: 198, percentage: 38 },
-        ].map((product, index) => (
-          <div key={index} className="flex items-center">
-            <div className="w-10 h-10 mr-3 rounded-lg bg-gray-100 flex items-center justify-center">
-              <Package className="h-5 w-5 text-gray-500" />
-            </div>
-            <div className="flex-1">
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">{product.name}</span>
-                <span className="text-sm text-gray-500">{product.sales} sold</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full"
-                  style={{ width: `${product.percentage}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 text-center">
-        <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-800">
-          View all products
-        </a>
-      </div>
-    </div>
-  );
-};
-
 const DashboardPage = () => {
   const [userCount, setUserCount] = useState(0);
-  const [productCount, setProductCount] = useState(0);
-  const [revenueCount, setRevenueCount] = useState(0);
-  const [orderCount, setOrderCount] = useState(0);
+  const [jadwalCount, setJadwalCount] = useState(0);
+  const [kelasCount, setKelasCount] = useState(0);
+  const [jurnalCount, setJurnalCount] = useState(0);
+  const [siswaCount, setSiswaCount] = useState(0);
+  const [mapelCount, setMapelCount] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [displayName, setDisplayName] = useState('User');
+
+  const getMe = () => {
+    try { return JSON.parse(localStorage.getItem('user') || 'null'); }
+    catch { return null; }
+  };
+  const getToken = () => localStorage.getItem('token') || '';
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      const me = getMe();
+      const token = getToken();
+      if (!me?._id || !token) {
+        window.location.href = '/login';
+        return;
+      }
+
       try {
-        const usersResponse = await axios.get('http://localhost:3000/api/getusers');
-        console.log("test")
+        const [usersRes, jadwalRes, kelasRes, jurnalRes, siswaRes, mapelRes] = await Promise.all([
+          axios.get('http://localhost:3000/api/getusers'),
+          axios.get('http://localhost:3000/api/getjadwals'),
+          axios.get('http://localhost:3000/api/getkelas'),
+          axios.get('http://localhost:3000/api/getjurnal'),
+          axios.get('http://localhost:3000/api/getstudents'),
+          axios.get('http://localhost:3000/api/getmapels'),
+        ]);
 
-        console.log('User data:', usersResponse.data);
-        const users = usersResponse.data.data;
+        // console.log('User data:', usersRes.data);
+        const users = usersRes.data.data;
 
-        // const productsResponse = await axios.get('http://localhost:3000/products');
-        // const ordersResponse = await axios.get('http://localhost:3000/sales',{
-        //   headers: {
-        //     Authorization: `Bearer ${localStorage.getItem('token')}`,
-        //   },
-        // });
-        // // console.log(`User: ${JSON.stringify(usersResponse.data)}`);
-        // // console.log('User data:', usersResponse.data);
+        // console.log('Jadwal data:', jadwalRes.data);
+        const jadwal = jadwalRes.data.data;
 
-        // const totalRevenue = ordersResponse.data.reduce((sum, order) => sum + order.total, 0);
-        // const rupiahFormatter = new Intl.NumberFormat('id-ID', { 
-        //   style: 'currency', 
-        //   currency: 'IDR' 
-        // }).format(totalRevenue);
+        // console.log('Kelas data:', kelasRes.data);
+        const kelas = kelasRes.data.data;
 
-        console.log("test lagi")
+        const jurnal = jurnalRes.data.data;
+
+        const siswa = siswaRes.data.data;
+
+        const mapel = mapelRes.data.data;
+
+        setSiswaCount(siswa.length);
+
         setUserCount(users.length);
-        console.log('User count:', users.length);
-        // setProductCount(productsResponse.data.length);
-        // setOrderCount(ordersResponse.data.length);
-        
-        // setRevenueCount(rupiahFormatter);
+
+        setMapelCount(mapel.length);
+
+        setJadwalCount(jadwal.length);
+
+        setKelasCount(kelas.length);
+
+        setJurnalCount(jurnal.length);
+
+        setDisplayName(
+          me?.namaLengkap ||
+          me?.username ||
+          (me?.email ? me.email.split('@')[0] : '') ||
+          'User'
+        );
+
+        // console.log('User count:', users.length);
+
       } catch (error) {
         console.error('Error fetching data cuk:', error);
       } finally {
@@ -132,7 +136,6 @@ const DashboardPage = () => {
     
     fetchData();
 
-    // Handle responsive sidebar for mobile devices
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setSidebarOpen(false);
@@ -183,7 +186,7 @@ const DashboardPage = () => {
         <main className={`flex-1 p-6 ${sidebarOpen ? 'md:ml-0' : 'ml-0'} transition-all duration-300 ease-in-out`}>
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-800">Dashboard Overview</h1>
-            <p className="text-gray-500">Welcome back, here's what's happening with your store today.</p>
+            <p className="text-gray-500">Selamat Datang <>{displayName}</>, di halaman dashboard SMPN 1 Sidoharjo</p>
           </div>
 
           {loading ? (
@@ -193,63 +196,51 @@ const DashboardPage = () => {
           ) : (
             <>
               {/* Metric Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 <DashboardCard
                   title="Users"
                   count={userCount}
                   icon={<Users className="h-6 w-6 text-white" />}
-                  // trend={5.2}
                   color="bg-blue-500"
                   link="/users"
                 />
                 <DashboardCard
                   title="Mata Pelajaran"
-                  count={productCount}
-                  icon={<Package className="h-6 w-6 text-white" />}
-                  // trend={3.1}
+                  count={mapelCount}
+                  icon={<BookOpen className="h-6 w-6 text-white" />}
                   color="bg-green-500"
-                  link="/products"
+                  link="/subjects"
                 />
                 <DashboardCard
                   title="Kelas"
-                  count={orderCount}
-                  icon={<ShoppingCart className="h-6 w-6 text-white" />}
-                  // trend={-1.5}
+                  count={kelasCount}
+                  icon={<School className="h-6 w-6 text-white" />}
                   color="bg-purple-500"
-                  link="/sales"
+                  link="/classes"
                 />
                 <DashboardCard
                   title="Jurnal Kelas"
-                  count={revenueCount}
-                  icon={<DollarSign className="h-6 w-6 text-white" />}
-                  // trend={8.7}
+                  count={jurnalCount}
+                  icon={<NotebookPen className="h-6 w-6 text-white" />}
                   color="bg-amber-500"
-                  link="/sales"
+                  link="/journal"
                 />
                 <DashboardCard
-                  title="Jadwal"  
-                  count={revenueCount}
-                  icon={<DollarSign className="h-6 w-6 text-white" />}
-                  // trend={8.7}
-                  color="bg-amber-500"
-                  link="/sales"
+                  title="Jadwal"
+                  count={jadwalCount}
+                  icon={<CalendarDays className="h-6 w-6 text-white" />}
+                  color="bg-indigo-500"
+                  link="/jadwal"
+                />
+                <DashboardCard
+                  title="Siswa"
+                  count={siswaCount}
+                  icon={<GraduationCap className="h-6 w-6 text-white" />}
+                  color="bg-pink-500"
+                  link="/students"
                 />
               </div>
 
-              {/* Charts and Tables */}
-              {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  <SimpleChart />
-                </div>
-                <div>
-                  <RecentActivity />
-                </div>
-              </div> */}
-
-              {/* Top Products */}
-              <div className="mt-6">
-                <TopProducts />
-              </div>
             </>
           )}
         </main>

@@ -4,7 +4,7 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
-import { UsersIcon, ArrowLeftIcon, PencilIcon } from 'lucide-react';
+import { UsersIcon, ArrowLeftIcon, PencilIcon, TrashIcon } from 'lucide-react';
 
 interface User {
   _id: string;
@@ -191,6 +191,37 @@ const UserDetailPage = () => {
     setIsUpdateModalOpen(true);
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Token tidak ditemukan');
+        alert('Anda harus login terlebih dahulu');
+        return;
+      }
+  
+      const response = await axios.delete(`http://localhost:3000/api/deleteuser/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (response.data.success) {
+        setUsers(users.filter(user => user._id !== userId));
+        alert('User berhasil dihapus');
+      } else {
+        alert(`Gagal menghapus user: ${response.data.message}`);
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      if (axios.isAxiosError(error)) {
+        alert(`Error: ${error.response?.data?.message || error.message}`);
+      } else {
+        alert('Terjadi kesalahan saat menghapus user');
+      }
+    }
+  };
+
 
   const getMapelName = (id: string) => {
     const mapel = mapels.find(m => m._id === id);
@@ -278,13 +309,6 @@ const UserDetailPage = () => {
             </Link>
             <UsersIcon className="h-8 w-8 text-blue-500 mr-3" />
             <h1 className="text-2xl font-bold text-gray-800">User Details</h1>
-            {/* <Link 
-              to={`/users/${user._id}`} 
-              className="ml-auto flex items-center text-green-500 hover:text-green-700"
-            >
-              <PencilIcon className="h-5 w-5 mr-1" />
-              Edit
-            </Link> */}
             <Link 
               to="#"
               onClick={() => handleOpenUpdateModal(user)}
@@ -292,6 +316,14 @@ const UserDetailPage = () => {
             >
               <PencilIcon className="h-5 w-5 mr-1" />
               Update
+            </Link>
+            <Link
+              to="#"
+              onClick={() => handleDeleteUser(user._id)}
+              className="ml-3 flex items-center text-red-500 hover:text-red-700"
+            >
+              <TrashIcon className="h-5 w-5 mr-1" />
+              Delete
             </Link>
           </div>
 
@@ -486,21 +518,6 @@ const UserDetailPage = () => {
                     />
                   </div>
 
-                  {/* <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Kelas Yang Diampu</label>
-                    <input
-                      type="text"
-                      name="kelasYangDiampu"
-                      value={formData.kelasYangDiampu.join(', ')}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        kelasYangDiampu: e.target.value.split(',').map(item => item.trim())
-                      })}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      placeholder="Pisahkan dengan koma (contoh: X IPA 1, X IPA 2)"
-                    />
-                  </div> */}
-
                   <div className='mb-4'>
                     <label className="block text-gray-700 mb-2">Kelas Yang Diampu</label>
                     <select
@@ -559,7 +576,7 @@ const UserDetailPage = () => {
               </div>
             </div>
           </div>
-        )}  
+      )}  
 
     </div>
   );

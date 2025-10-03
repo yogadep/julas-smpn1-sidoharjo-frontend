@@ -9,20 +9,44 @@ const LoginForm = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // const handleLogin = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     const response = await axios.post('http://localhost:3000/api/login', { 
+  //       username, 
+  //       password 
+  //     });
+      
+  //     if (response.data.success) {
+  //       localStorage.setItem('token', response.data.data.token);
+  //       // You might want to store user data as well
+  //       console.log('User data:', response.data.data.user);
+  //       localStorage.setItem('user', JSON.stringify(response.data.data.user));
+  //       navigate('/dashboard');
+  //     } else {
+  //       setError('Login failed. Please try again.');
+  //     }
+  //   } catch (err) {
+  //     console.error('Login error:', err);
+  //     setError('Username atau password salah');
+  //   }
+  // };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/login', { 
-        username, 
-        password 
-      });
-      
-      if (response.data.success) {
-        localStorage.setItem('token', response.data.data.token);
-        // You might want to store user data as well
-        console.log('User data:', response.data.data.user);
-        localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        navigate('/dashboard');
+      const { data } = await axios.post('http://localhost:3000/api/login', { username, password });
+      if (data?.success) {
+        const { token, user } = data.data;
+        console.log('User login:', user);
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+  
+        // Arahkan sesuai role
+        if (user.role === 'admin') navigate('dashboard/admin');
+        else if (user.role === 'guru') navigate('dashboard/guru');
+        else navigate('/');
+  
       } else {
         setError('Login failed. Please try again.');
       }

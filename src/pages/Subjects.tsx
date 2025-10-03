@@ -1,24 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import UserTable from '../components/UserTable';
+import MapelTable from '../components/MapelTable';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import { UsersIcon } from 'lucide-react';
 
-interface User {
-    _id: string;
-    username: string;
-    namaLengkap: string;
-    role: string;
-    email: string;
-    nip?: string;
-    alamat?: string;
-    mataPelajaran: string[];
-    kelasYangDiampu: string[];
-    createdAt: string;
-    updatedAt: string;
-}
 
 interface Mapel {
   _id: string;
@@ -30,7 +17,7 @@ interface Mapel {
 // const [mapels, setMapels] = useState<Mapel[]>([]);
 
 const UserListingPage = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  // const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -46,8 +33,8 @@ const UserListingPage = () => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:3000/api/getusers');
-        setUsers(response.data.data);
+        const response = await axios.get('http://localhost:3000/api/getmapels');
+        setMapels(response.data.data);
       } catch (error) {
         console.error('Error fetching users:', error);
       } finally {
@@ -58,15 +45,9 @@ const UserListingPage = () => {
   }, []);
 
   const [formData, setFormData] = useState({
-    username: '',
-    password: '', // Ditambahkan karena required di schema
-    namaLengkap: '',
-    role: 'guru', // Default value
-    email: '',
-    nip: '',
-    alamat: '',
-    mataPelajaran: [] as string[],
-    kelasYangDiampu: [] as string[]
+    kodeMapel: '',
+    namaMapel: '',
+    description: ''
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -74,20 +55,6 @@ const UserListingPage = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value 
-    }));
-  };
-
-  const handleMataPelajaranChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const options = e.target.options;
-    const selectedValues: string[] = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selectedValues.push(options[i].value);
-      }
-    }
-    setFormData(prev => ({
-      ...prev,
-      mataPelajaran: selectedValues
     }));
   };
 
@@ -105,41 +72,32 @@ const UserListingPage = () => {
       // Format data sesuai dengan yang diharapkan backend
       const requestData = {
         ...formData,
-        // Jika backend mengharapkan ID untuk mataPelajaran, sesuaikan disini
-        mataPelajaran: formData.mataPelajaran.map(mp => mp), // atau format lain sesuai kebutuhan
-        kelasYangDiampu: [] // tambahkan jika diperlukan
       };
   
-      console.log('Data yang akan dikirim:', requestData); // Debug log
+      console.log('Data yang akan dikirim:', requestData); 
   
-      const response = await axios.post('http://localhost:3000/api/adduser', requestData, {
+      const response = await axios.post('http://localhost:3000/api/addmapel', requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
       });
   
-      console.log('Response:', response.data); // Debug log
+      console.log('Response:', response.data); 
   
       if (response.data.success) {
-        setUsers([...users, response.data.data]);
+        setMapels([...mapels, response.data.data]);
         setIsCreateModalOpen(false);
         setFormData({ 
-          username: '',
-          password: '',
-          namaLengkap: '',
-          role: 'guru',
-          email: '',
-          nip: '',
-          alamat: '',
-          mataPelajaran: [],
-          kelasYangDiampu: []
+          kodeMapel: '',
+          namaMapel: '',
+          description: ''
         });
         // Tambahkan notifikasi sukses
-        alert('User berhasil dibuat');
+        alert('Mata Pelajaran berhasil dibuat');
       } else {
         // Tampilkan pesan error dari backend
-        alert(`Gagal membuat user: ${response.data.message}`);
+        alert(`Gagal membuat Mata Pelajaran: ${response.data.message}`);
       }
     } catch (error) {
       console.error('Error creating user:', error);
@@ -152,7 +110,7 @@ const UserListingPage = () => {
     }
   };
 
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedMapel, setSelectedMapel] = useState<Mapel | null>(null);
 
   const handleUpdateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,19 +122,15 @@ const UserListingPage = () => {
         return;
       }
   
-      if (!selectedUser) return;
-  
-      // Format data untuk update (password tidak wajib di update)
+      if (!selectedMapel) return;
+
       const updateData = {
         ...formData,
-        _id: selectedUser._id, // Pastikan ID ikut terkirim
-        password: formData.password || undefined, // Hanya kirim jika diisi
-        mataPelajaran: formData.mataPelajaran,
-        kelasYangDiampu: formData.kelasYangDiampu
+        _id: selectedMapel._id, 
       };
   
       const response = await axios.put(
-        `http://localhost:3000/api/updateuser/${selectedUser._id}`,
+        `http://localhost:3000/api/updatemapel/${selectedMapel._id}`,
         updateData,
         {
           headers: {
@@ -187,37 +141,37 @@ const UserListingPage = () => {
       );
   
       if (response.data.success) {
-        setUsers(users.map(user => 
-          user._id === selectedUser._id ? response.data.data : user
+        setMapels(mapels.map(mapel => 
+          mapel._id === selectedMapel._id ? response.data.data : mapel
         ));
         setIsUpdateModalOpen(false);
-        setSelectedUser(null);
-        alert('User berhasil diupdate');
+        setSelectedMapel(null);
+        alert('Mata Pelajaran berhasil diupdate');
       } else {
-        alert(`Gagal mengupdate user: ${response.data.message}`);
+        alert(`Gagal mengupdate Maata Pelajaran: ${response.data.message}`);
       }
     } catch (error) {
-      console.error('Error updating user:', error);
+      console.error('Error updating Maata Pelajaran:', error);
       if (axios.isAxiosError(error)) {
         alert(`Error: ${error.response?.data?.message || error.message}`);
       } else {
-        alert('Terjadi kesalahan saat mengupdate user');
+        alert('Terjadi kesalahan saat mengupdate Mata Pelajaran');
       }
     }
   };
 
   // ====== DATA YANG DITAMPILKAN DI TABEL ======
-  const viewUsers = users;
+  const viewMapels = mapels;
 
   // ====== PAGINATION COMPUTATION ======
-  const totalItems = viewUsers.length;
+  const totalItems = viewMapels.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalItems);
 
   const pageItems = useMemo(
-    () => viewUsers.slice(startIndex, endIndex),
-    [viewUsers, startIndex, endIndex]
+    () => viewMapels.slice(startIndex, endIndex),
+    [viewMapels, startIndex, endIndex]
   );
 
   const pageNumbers = useMemo(() => {
@@ -243,53 +197,6 @@ const UserListingPage = () => {
     return pages;
   }, [currentPage, totalPages]);
 
-  const handleOpenUpdateModal = (user: User) => {
-    setSelectedUser(user);
-    setFormData({
-      username: user.username,
-      password: '', // Biarkan kosong, optional untuk update
-      namaLengkap: user.namaLengkap,
-      role: user.role,
-      email: user.email,
-      nip: user.nip || '',
-      alamat: user.alamat || '',
-      mataPelajaran: user.mataPelajaran,
-      kelasYangDiampu: user.kelasYangDiampu
-    });
-    setIsUpdateModalOpen(true);
-  };
-  
-
-  const handleDeleteData = async (userId: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('Token tidak ditemukan');
-        alert('Anda harus login terlebih dahulu');
-        return;
-      }
-  
-      const response = await axios.delete(`http://localhost:3000/api/deleteuser/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
-      if (response.data.success) {
-        setUsers(users.filter(user => user._id !== userId));
-        alert('User berhasil dihapus');
-      } else {
-        alert(`Gagal menghapus user: ${response.data.message}`);
-      }
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      if (axios.isAxiosError(error)) {
-        alert(`Error: ${error.response?.data?.message || error.message}`);
-      } else {
-        alert('Terjadi kesalahan saat menghapus user');
-      }
-    }
-  };
 
   const fetchMapels = async () => {
     try {
@@ -304,7 +211,6 @@ const UserListingPage = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       await fetchMapels();
-      // Anda bisa tambahkan fetch lainnya di sini
     };
     loadInitialData();
   }, []);
@@ -331,7 +237,7 @@ const UserListingPage = () => {
         <main className="flex-1 p-6">
           <div className="flex items-center mb-6">
             <UsersIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <h1 className="text-2xl font-bold text-gray-800">User Listing</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Mapel Listing</h1>
           </div>
 
           <button
@@ -346,7 +252,7 @@ const UserListingPage = () => {
               >
                 <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
-              Create New User
+              Create New Mapel
             </button>
             <br />
 
@@ -356,12 +262,14 @@ const UserListingPage = () => {
             </div>
           ) : (
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <UserTable 
-                users={pageItems}
+              {/* <UserTable 
+                mapels={mapels}
                 onDelete={handleDeleteData}
                 onUpdate={handleOpenUpdateModal}
+              /> */}
+              <MapelTable 
+                subjects={pageItems}
               />
-              
             </div>
           )}
           {/* Pagination */}
@@ -406,6 +314,7 @@ const UserListingPage = () => {
                   </button>
                 </div>
           </div>
+
         </main>
 
         {/* Footer */}
@@ -415,15 +324,15 @@ const UserListingPage = () => {
           <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
               <div className="p-6 overflow-y-auto">
-                <h2 className="text-xl font-bold mb-4">Create New User</h2>
+                <h2 className="text-xl font-bold mb-4">Create New Mapel</h2>
                   <form onSubmit={handleCreateSubmit}>
                         {/* Form fields tetap sama seperti sebelumnya */}
                         <div className="mb-4">
-                          <label className="block text-gray-700 mb-2">Username*</label>
+                          <label className="block text-gray-700 mb-2">Kode Mapel*</label>
                           <input
                             type="text"
-                            name="username"
-                            value={formData.username}
+                            name="kodeMapel"
+                            value={formData.kodeMapel}
                             onChange={handleInputChange}
                             className="w-full p-2 border border-gray-300 rounded-md"
                             required
@@ -431,23 +340,11 @@ const UserListingPage = () => {
                         </div>
 
                         <div className="mb-4">
-                          <label className="block text-gray-700 mb-2">Password*</label>
-                          <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            required
-                          />
-                        </div>
-                        
-                        <div className="mb-4">
-                          <label className="block text-gray-700 mb-2">Nama Lengkap*</label>
+                          <label className="block text-gray-700 mb-2">Nama Mapel*</label>
                           <input
                             type="text"
-                            name="namaLengkap"
-                            value={formData.namaLengkap}
+                            name="namaMapel"
+                            value={formData.namaMapel}
                             onChange={handleInputChange}
                             className="w-full p-2 border border-gray-300 rounded-md"
                             required
@@ -455,73 +352,17 @@ const UserListingPage = () => {
                         </div>
                         
                         <div className="mb-4">
-                          <label className="block text-gray-700 mb-2">Role*</label>
-                          <select
-                            name="role"
-                            value={formData.role}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            required
-                          >
-                            <option value="guru">Guru</option>
-                            <option value="admin">Admin</option>
-                            <option value="kepsek">Kepala Sekolah</option>
-                          </select>
-                        </div>
-                        
-                        <div className="mb-4">
-                          <label className="block text-gray-700 mb-2">Email</label>
-                          <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        
-                        <div className="mb-4">
-                          <label className="block text-gray-700 mb-2">NIP</label>
+                          <label className="block text-gray-700 mb-2">Description*</label>
                           <input
                             type="text"
-                            name="nip"
-                            value={formData.nip}
+                            name="description"
+                            value={formData.description}
                             onChange={handleInputChange}
                             className="w-full p-2 border border-gray-300 rounded-md"
+                            required
                           />
                         </div>
                         
-                        <div className="mb-4">
-                          <label className="block text-gray-700 mb-2">Alamat</label>
-                          <textarea
-                            name="alamat"
-                            value={formData.alamat}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            rows={3}
-                          />
-                        </div>
-                
-                      <div className="mb-4">
-                        <label className="block text-gray-700 mb-2">Mata Pelajaran</label>
-                        <select
-                          name="mataPelajaran"
-                          multiple
-                          value={formData.mataPelajaran}
-                          onChange={handleMataPelajaranChange}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          {mapels.map((mapel) => (
-                            <option key={mapel._id} value={mapel._id}>
-                              {mapel.namaMapel} ({mapel.kodeMapel})
-                            </option>
-                          ))}
-                        </select>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Gunakan Ctrl untuk memilih multiple
-                        </p>
-                      </div>
-
                         <div className="border-t p-4 bg-gray-50 sticky bottom-0">
                         <div className="flex justify-end space-x-3">
                           <button
@@ -535,7 +376,7 @@ const UserListingPage = () => {
                             type="submit"
                             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                           >
-                            Create User
+                            Create Mapel
                           </button>
                       </div>
                     </div>
@@ -545,18 +386,18 @@ const UserListingPage = () => {
           </div>
         )}
 
-        {isUpdateModalOpen && selectedUser && (
+        {isUpdateModalOpen && selectedMapel && (
           <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
               <div className="p-6 overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">Update User</h2>
                 <form onSubmit={handleUpdateSubmit}>
                   <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Username</label>
+                    <label className="block text-gray-700 mb-2">Kode Mapel</label>
                     <input
                       type="text"
-                      name="username"
-                      value={formData.username}
+                      name="kodemapel"
+                      value={formData.kodeMapel}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
                       disabled
@@ -564,110 +405,27 @@ const UserListingPage = () => {
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Password (Kosongi jika tidak ingin mengubah)</label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      placeholder="********"
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Nama Lengkap*</label>
+                    <label className="block text-gray-700 mb-2">Nama Mapel</label>
                     <input
                       type="text"
-                      name="namaLengkap"
-                      value={formData.namaLengkap}
+                      name="namamapel"
+                      value={formData.namaMapel}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md"
-                      required
+                      disabled
                     />
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Role*</label>
-                    <select
-                      name="role"
-                      value={formData.role}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      required
-                    >
-                      <option value="guru">Guru</option>
-                      <option value="admin">Admin</option>
-                      <option value="kepsek">Kepala Sekolah</option>
-                    </select>
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Email</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">NIP</label>
+                    <label className="block text-gray-700 mb-2">Description*</label>
                     <input
                       type="text"
-                      name="nip"
-                      value={formData.nip}
+                      name="description"
+                      value={formData.description}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md"
+                      disabled
                     />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Alamat</label>
-                    <textarea
-                      name="alamat"
-                      value={formData.alamat}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Kelas Yang Diampu</label>
-                    <input
-                      type="text"
-                      name="kelasYangDiampu"
-                      value={formData.kelasYangDiampu.join(', ')}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        kelasYangDiampu: e.target.value.split(',').map(item => item.trim())
-                      })}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      placeholder="Pisahkan dengan koma (contoh: X IPA 1, X IPA 2)"
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Mata Pelajaran</label>
-                    <select
-                      name="mataPelajaran"
-                      multiple
-                      value={formData.mataPelajaran}
-                      onChange={handleMataPelajaranChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    >
-                      {mapels.map((mapel) => (
-                        <option key={mapel._id} value={mapel._id}>
-                          {mapel.namaMapel} ({mapel.kodeMapel})
-                        </option>
-                      ))}
-                    </select>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Gunakan Ctrl untuk memilih multiple
-                    </p>
                   </div>
 
                   <div className="border-t p-4 bg-gray-50 sticky bottom-0">

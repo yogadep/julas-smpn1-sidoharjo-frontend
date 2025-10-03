@@ -1,48 +1,55 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import {
   HomeIcon,
-  UsersIcon,
   LogOutIcon,
   MenuIcon,
   XIcon,
-  GraduationCap,
-  School,
   CalendarDays,
-  BookOpen,
   NotebookPen
 } from 'lucide-react';
+import axios from 'axios';
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true);
-
-  // responsive collapse/expand
+  
+  // Handle responsiveness based on screen size
   useEffect(() => {
-    const handleResize = () => setIsOpen(window.innerWidth >= 768);
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsOpen(false);
+      } else {
+        setIsOpen(true);
+      }
+    };
+    
+    // Set initial state
     handleResize();
+    
+    // Add event listener
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
+  
   const menuItems = [
-    { path: '/dashboard/admin', name: 'Home', icon: <HomeIcon className="h-5 w-5" /> },
-    { path: '/users', name: 'Users', icon: <UsersIcon className="h-5 w-5" /> },
-    { path: '/students', name: 'Siswa', icon: <GraduationCap className="h-5 w-5" /> },
-    { path: '/classes', name: 'Kelas', icon: <School className="h-5 w-5" /> },
-    { path: '/jadwal', name: 'Jadwal Pelajaran', icon: <CalendarDays className="h-5 w-5" /> },
-    { path: '/subjects', name: 'Mata Pelajaran', icon: <BookOpen className="h-5 w-5" /> },
-    { path: '/journal', name: 'Jurnal Kelas', icon: <NotebookPen className="h-5 w-5" /> }
+    { path: '/dashboard/guru', name: 'Home', icon: <HomeIcon className="h-5 w-5" /> },
+    { path: '/jadwal/guru', name: 'Jadwal Pelajaran', icon: <CalendarDays className="h-5 w-5" /> },
+    { path: '/journal/guru', name: 'Jurnal Kelas', icon: <NotebookPen className="h-5 w-5" /> }
   ];
+  
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+  
+  // Handle sidebar toggle
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
 
-  const isActive = (path: string) => location.pathname === path;
-
-  const toggleSidebar = () => setIsOpen(!isOpen);
-
-  // === Handle logout ===
-  const handleLogout = async () => {
+   // === Handle logout ===
+   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post('http://localhost:3000/api/logout', {}, {
@@ -61,7 +68,7 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile toggle button */}
+      {/* Mobile toggle button - fixed at top left */}
       <button 
         onClick={toggleSidebar}
         className="fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg transition-all duration-300 lg:hidden"
@@ -80,7 +87,7 @@ const Sidebar = () => {
           }`}
         >
           <div className="h-full flex flex-col overflow-y-auto scrollbar-thin">
-            {/* Logo */}
+            {/* Logo/Store Name */}
             <div className={`flex items-center px-4 py-6 ${!isOpen && 'lg:justify-center'}`}>
               <div className="h-10 w-10 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold text-xl">
                 M
@@ -155,7 +162,7 @@ const Sidebar = () => {
           </div>
         </aside>
         
-        {/* Overlay mobile */}
+        {/* Semi-transparent overlay for mobile when sidebar is open */}
         {isOpen && (
           <div 
             className="fixed inset-0 bg-black/30 z-30 lg:hidden"
@@ -164,11 +171,11 @@ const Sidebar = () => {
           />
         )}
         
-        {/* Main content spacer */}
+        {/* Main content area - adjusted margin */}
         <main className={`transition-all duration-300 min-h-screen flex-1 ${
           isOpen ? 'ml-64' : 'ml-0 lg:ml-16'
         }`}>
-          {/* page content */}
+          {/* Your page content goes here */}
         </main>
       </div>
     </>
