@@ -33,7 +33,8 @@ interface Jadwal {
   kelas: string | KelasLite;
   hari: Hari;
   jamKe: number;
-  mapel?: string | { _id: string; namaMapel: string } | null;
+  // mapel?: string | { _id: string; namaMapel: string } | null;
+  mapel: string | MapelLite;
   createdBy?: string | UserLite;
   updatedBy?: string | UserLite | null;
   createdAt?: string;
@@ -54,6 +55,21 @@ const labelMapel = (m?: Jadwal['mapel']) => {
   if (!m) return '—';
   return typeof m === 'string' ? m : (m.namaMapel || m._id);
 };
+
+// const mapelNameById = useMemo(() => {
+//   const m = new Map<string, string>();
+//   mapels.forEach(mp => m.set(mp._id, mp.namaMapel));
+//   return m;
+// }, [mapels]);
+
+
+// const labelMapel = (m?: Jadwal['mapel']) => {
+//   if (!m) return '—';
+//   // return typeof m === 'string' ? m : (m.namaMapel || m._id);
+//   if (typeof m === 'object' && 'namaMapel' in m) return m.namaMapel;
+//   if (typeof m === 'string') return mapelNameById.get(m) ?? m;
+//   return '-'
+// }
 
 const labelUser = (u?: string | UserLite | null) => {
   if (!u) return '—';
@@ -268,7 +284,7 @@ const JadwalDetailPage = () => {
               <ArrowLeftIcon className="h-6 w-6" />
             </Link>
             <CalendarDaysIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <h1 className="text-2xl font-bold text-gray-800">Jadwal Details</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Detail Jadwal Pelajaran</h1>
 
             <button
               onClick={() => handleOpenUpdateModal(jadwal)}

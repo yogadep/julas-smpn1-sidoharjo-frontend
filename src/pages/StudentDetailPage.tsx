@@ -229,7 +229,7 @@ const StudentDetailPage = () => {
               <ArrowLeftIcon className="h-6 w-6" />
             </Link>
             <UsersIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <h1 className="text-2xl font-bold text-gray-800">Student Details</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Detail Siswa</h1>
 
             <button
               onClick={() => handleOpenUpdateModal(student)}

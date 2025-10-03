@@ -29,7 +29,7 @@ interface UserLite {
   name?: string;
   email?: string;
   role?: string;
-  namaLengkap?: string; // kalau BE punya field ini
+  namaLengkap?: string;
 }
 
 interface KelasLite {
@@ -139,7 +139,7 @@ const JournalListingPage = () => {
   const printRef = useRef<HTMLDivElement>(null);
 
   // pagination
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);       // NEW: akan direfresh saat filter guru berubah
   const pageSize = 10;
 
   const [formData, setFormData] = useState({
@@ -258,6 +258,11 @@ const JournalListingPage = () => {
           siswaSakit: [],
           catatan: '',
         });
+        // NEW: setelah create, auto set filter ke guru yang dipilih biar langsung kelihatan
+        if (payload.guru) {
+          setSelectedGuru(payload.guru);
+          setCurrentPage(1);
+        }
         alert('Jurnal berhasil dibuat');
       } else {
         alert(`Gagal membuat jurnal: ${res.data.message}`);
@@ -344,62 +349,39 @@ const JournalListingPage = () => {
     }
   };
 
-  // ====== DATA YANG DITAMPILKAN DI TABEL ======
-  const showJournals = journals;
+// helper untuk mendapatkan nama guru
+const guruLabel = (u?: UserLite | null) =>
+  u ? (u.namaLengkap || u.name || u.username || u.email || u._id) : '';
 
-  // ====== PAGINATION COMPUTATION ======
-  const totalItems = showJournals.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, totalItems);
+const guruOptions = useMemo(() => {
+  // Kumpulkan ID guru yang memang muncul di journals
+  const ids = new Set<string>();
+  const labelFromJournal = new Map<string, string>(); // kalau kebetulan populated
+  for (const j of journals) {
+    const id = typeof j.guru === 'string' ? j.guru : j.guru?._id;
+    if (!id) continue;
+    ids.add(id);
+    if (typeof j.guru !== 'string') {
+      labelFromJournal.set(id, guruLabel(j.guru));
+    }
+  }
 
-  const pageItems = useMemo(
-    () => showJournals.slice(startIndex, endIndex),
-    [showJournals, startIndex, endIndex]
+  // Buat index id → label dari daftar 'gurus'
+  const labelById = new Map<string, string>();
+  for (const g of gurus) {
+    labelById.set(g._id, guruLabel(g));
+  }
+
+  const opts = Array.from(ids).map((id) => ({
+    id,
+    label: labelFromJournal.get(id) || labelById.get(id) || id,
+  }));
+
+  return opts.sort((a, b) =>
+    a.label.localeCompare(b.label, 'id', { sensitivity: 'base' })
   );
+}, [journals, gurus]);
 
-  const pageNumbers = useMemo(() => {
-    const pages: (number | '…')[] = [];
-    if (totalPages <= 7) {
-      for (let p = 1; p <= totalPages; p++) pages.push(p);
-      return pages;
-    }
-    const add = (x: number | '…') => pages.push(x);
-    const near = [currentPage - 1, currentPage, currentPage + 1].filter(
-      p => p >= 1 && p <= totalPages
-    );
-
-    add(1);
-    if (near[0] && near[0] > 2) add('…');
-
-    near.forEach(p => {
-      if (p !== 1 && p !== totalPages) add(p);
-    });
-
-    if (near[near.length - 1] && near[near.length - 1] < totalPages - 1) add('…');
-    add(totalPages);
-    return pages;
-  }, [currentPage, totalPages]);
-
-  // opsi filter guru
-  const guruOptions = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const j of journals) {
-      const id = typeof j.guru === 'string' ? j.guru : j.guru?._id;
-      if (!id) continue;
-      const label =
-        typeof j.guru === 'string'
-          ? j.guru
-          : j.guru?.name || j.guru?.username || j.guru?.email || j.guru?._id;
-      if (label) m.set(id, label);
-    }
-    for (const g of gurus) {
-      const label = g.name || g.username || g.email || g._id;
-      m.set(g._id, label);
-    }
-    return Array.from(m, ([id, label]) => ({ id, label }))
-      .sort((a, b) => a.label.localeCompare(b.label, 'id', { sensitivity: 'base' }));
-  }, [journals, gurus]);
 
   // sort: guru ASC → kelas ASC → jamPelajaran ASC
   const sortedJournals = useMemo(() => {
@@ -423,6 +405,7 @@ const JournalListingPage = () => {
     });
   }, [journals]);
 
+  // filter by selectedGuru — PENTING: ini yang dipakai untuk pagination (lihat dataSource di bawah)
   const viewJournals = useMemo(() => {
     if (!selectedGuru) return sortedJournals;
     return sortedJournals.filter(j => {
@@ -430,6 +413,11 @@ const JournalListingPage = () => {
       return id === selectedGuru;
     });
   }, [sortedJournals, selectedGuru]);
+
+  // >>> NEW: reset page ke 1 kalau filter berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedGuru]);
 
   // ===== EXPORT / PRINT (FULL dari DB, abaikan filter) =====
   const handlePrintFull = useReactToPrint({
@@ -440,11 +428,12 @@ const JournalListingPage = () => {
   });
 
   const handleExportPDFFull = () => {
+    // CHANGED: kalau user sedang filter, kasih opsi export yang terfilter juga (seperti jadwal code-mu)
     const data = selectedGuru ? viewJournals : journals;
     if (!data.length) return;
-  
+
     const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
-  
+
     data.forEach((j, idx) => {
       const rows = [
         ['Guru', labelGuru(j.guru)],
@@ -472,15 +461,15 @@ const JournalListingPage = () => {
       });
       if (idx < data.length - 1) doc.addPage();
     });
-  
+
     const suffix = selectedGuru ? `_filtered_${selectedGuru}` : '';
     doc.save(`jurnal_detail${suffix}.pdf`);
   };
-  
+
   const handleExportWordFull = async () => {
     const data = selectedGuru ? viewJournals : journals;
     if (!data.length) return;
-  
+
     const sectionsChildren = data.map((j, idx) => {
       const pairs: [string, string][] = [
         ['Guru', labelGuru(j.guru)],
@@ -507,23 +496,23 @@ const JournalListingPage = () => {
       });
       return [header, new Paragraph(' '), table, new Paragraph(' ')];
     }).flat();
-  
+
     const doc = new Document({ sections: [{ properties: {}, children: sectionsChildren }] });
     const blob = await Packer.toBlob(doc);
     const suffix = selectedGuru ? `_filtered_${selectedGuru}` : '';
     saveAs(blob, `jurnal_detail${suffix}.docx`);
   };
-  
+
   const handleExportExcelFull = () => {
     const data = selectedGuru ? viewJournals : journals;
     if (!data.length) return;
-  
+
     const header = [
       'Guru','Kelas','Mapel','Jam Pelajaran',
       'Materi','Catatan','Tidak Hadir','Izin','Sakit',
       'Created At','Last Updated'
     ];
-  
+
     const rows = data.map(j => ([
       labelGuru(j.guru),
       labelKelas(j.kelas),
@@ -537,14 +526,50 @@ const JournalListingPage = () => {
       fmtDate(j.createdAt),
       fmtDate(j.updatedAt),
     ]));
-  
+
     const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Jurnal');
     const suffix = selectedGuru ? `_filtered_${selectedGuru}` : '';
     XLSX.writeFile(wb, `jurnal_detail${suffix}.xlsx`);
   };
-  
+
+  // ====== PAGINATION (MENGIKUTI FILTER) — seperti di Jadwal ======
+  const dataSource = viewJournals;                                  // NEW: paginasi berdasarkan data yg sudah difilter
+  const totalItems = dataSource.length;                              // CHANGED: sebelumnya pakai semua journals
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+
+  const pageItems = useMemo(
+    () => dataSource.slice(startIndex, endIndex),                    // NEW: slice dari dataSource (filtered)
+    [dataSource, startIndex, endIndex]
+  );
+
+  // >>> NEW: clamp current page kalau totalPages mengecil (misal setelah filter)
+  useEffect(() => {
+    setCurrentPage(p => Math.min(p, totalPages));
+  }, [totalPages]);
+
+  const pageNumbers = useMemo(() => {
+    const pages: (number | '…')[] = [];
+    if (totalPages <= 7) {
+      for (let p = 1; p <= totalPages; p++) pages.push(p);
+      return pages;
+    }
+    const add = (x: number | '…') => pages.push(x);
+    const near = [currentPage - 1, currentPage, currentPage + 1].filter(
+      p => p >= 1 && p <= totalPages
+    );
+
+    add(1);
+    if (near[0] && near[0] > 2) add('…');
+
+    near.forEach(p => { if (p !== 1 && p !== totalPages) add(p); });
+    if (near[near.length - 1] && near[near.length - 1] < totalPages - 1) add('…');
+    add(totalPages);
+    return pages;
+  }, [currentPage, totalPages]);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -560,33 +585,33 @@ const JournalListingPage = () => {
         <main className="flex-1 p-6">
           <div className="flex items-center mb-6">
             <BookOpenIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <h1 className="text-2xl font-bold text-gray-800">Jurnal Listing</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Daftar Jurnal</h1>
 
-            {/* Tombol Export/Print Full Detail (ambil semua data dari DB, bukan yang difilter) */}
+            {/* Tombol Export/Print */}
             <div className="ml-auto flex flex-wrap gap-2">
               <button
                 onClick={handleExportExcelFull}
                 disabled={loading || !journals.length}
                 className="px-3 py-2 rounded-md bg-white border hover:bg-gray-50 text-gray-700 disabled:opacity-50"
-                title="Export Excel (Full Detail)"
+                title="Export Excel (Full/Filtered)"
               >
-                Excel Full
+                Excel
               </button>
               <button
                 onClick={handleExportPDFFull}
                 disabled={loading || !journals.length}
                 className="px-3 py-2 rounded-md bg-white border hover:bg-gray-50 text-gray-700 disabled:opacity-50"
-                title="Export PDF (Full Detail)"
+                title="Export PDF (Full/Filtered)"
               >
-                PDF Full
+                PDF
               </button>
               <button
                 onClick={handleExportWordFull}
                 disabled={loading || !journals.length}
                 className="px-3 py-2 rounded-md bg-white border hover:bg-gray-50 text-gray-700 disabled:opacity-50"
-                title="Export Word (Full Detail)"
+                title="Export Word (Full/Filtered)"
               >
-                Word Full
+                Word
               </button>
               <button
                 onClick={handlePrintFull}
@@ -606,7 +631,7 @@ const JournalListingPage = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
-            Create New Journal
+            Buat Jurnal Baru
           </button>
 
           {/* Filter Guru */}
@@ -637,7 +662,7 @@ const JournalListingPage = () => {
               {printMode === 'table' ? (
                 <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                   <JournalTable
-                    jurnalList={pageItems}
+                    jurnalList={pageItems}                  
                     onUpdate={handleOpenUpdateModal}
                   />
                 </div>
@@ -648,47 +673,48 @@ const JournalListingPage = () => {
               )}
             </div>
           )}
+
           {/* Pagination Controls */}
           <div className="flex items-center justify-between mt-4">
-                <div className="text-sm text-gray-600">
-                  {totalItems
-                    ? <>Showing <span className="font-medium">{startIndex + 1}</span>–<span className="font-medium">{endIndex}</span> of <span className="font-medium">{totalItems}</span> entries</>
-                    : 'No entries'}
-                </div>
+            <div className="text-sm text-gray-600">
+              {totalItems
+                ? <>Showing <span className="font-medium">{startIndex + 1}</span>–<span className="font-medium">{endIndex}</span> of <span className="font-medium">{totalItems}</span> entries</>
+                : 'No entries'}
+            </div>
 
-                <div className="inline-flex items-center gap-1">
+            <div className="inline-flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 border rounded-md text-sm disabled:opacity-50 bg-white hover:bg-gray-50"
+              >
+                Prev
+              </button>
+
+              {pageNumbers.map((p, i) =>
+                p === '…' ? (
+                  <span key={`dots-${i}`} className="px-2 select-none">…</span>
+                ) : (
                   <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1.5 border rounded-md text-sm disabled:opacity-50 bg-white hover:bg-gray-50"
+                    key={p}
+                    onClick={() => setCurrentPage(p)}
+                    className={`px-3 py-1.5 border rounded-md text-sm ${
+                      p === currentPage ? 'bg-blue-600 text-white border-blue-600' : 'bg-white hover:bg-gray-50'
+                    }`}
                   >
-                    Prev
+                    {p}
                   </button>
+                )
+              )}
 
-                  {pageNumbers.map((p, i) =>
-                    p === '…' ? (
-                      <span key={`dots-${i}`} className="px-2 select-none">…</span>
-                    ) : (
-                      <button
-                        key={p}
-                        onClick={() => setCurrentPage(p)}
-                        className={`px-3 py-1.5 border rounded-md text-sm ${
-                          p === currentPage ? 'bg-blue-600 text-white border-blue-600' : 'bg-white hover:bg-gray-50'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    )
-                  )}
-
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 border rounded-md text-sm disabled:opacity-50 bg-white hover:bg-gray-50"
-                  >
-                    Next
-                  </button>
-                </div>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 border rounded-md text-sm disabled:opacity-50 bg-white hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </main>
 
@@ -699,7 +725,7 @@ const JournalListingPage = () => {
           <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
               <div className="p-6 overflow-y-auto">
-                <h2 className="text-xl font-bold mb-4">Create New Jurnal</h2>
+                <h2 className="text-xl font-bold mb-4">Buat Jurnal Baru</h2>
                 <form onSubmit={handleCreateSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>

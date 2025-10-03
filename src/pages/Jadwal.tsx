@@ -14,6 +14,7 @@ interface UserLite {
   name?: string;
   email?: string;
   role?: string;
+  namaLengkap?: string;
 }
 
 interface KelasLite {
@@ -214,29 +215,49 @@ const JadwalListingPage = () => {
     });
   }, [jadwals]);
 
-  // CHANGED: lengkapi opsi filter dengan daftar guru juga,
-  // supaya dropdown tetap muncul meski belum ada jadwal untuk guru tsb.
-  const creatorOptions = useMemo(() => {
-    const m = new Map<string, string>();
+// Helper to get a readable teacher name from a UserLite object
+const guruLabel = (u?: UserLite | null) =>
+  u ? (u.namaLengkap || u.name || u.username || u.email || u._id) : '';
 
-    for (const j of jadwals) {
-      const id = typeof j.createdBy === 'string' ? j.createdBy : j.createdBy?._id;
-      if (!id) continue;
-      const label =
-        typeof j.createdBy === 'string'
-          ? j.createdBy
-          : j.createdBy?.name || j.createdBy?.username || j.createdBy?.email || j.createdBy?._id;
-      if (label) m.set(id, label);
+const creatorOptions = useMemo(() => {
+  // 1) Collect ONLY teacher IDs that actually appear in the journals data.
+  //    This Set becomes our “who has data” filter.
+  const ids = new Set<string>();
+  //    If journal.guru is populated (object), we can capture a nicer label directly from it.
+  const labelFromJournal = new Map<string, string>();
+
+  for (const j of jadwals) {
+    // Support both populated (object) and unpopulated (string) guru fields
+    const id = typeof j.createdBy === 'string' ? j.createdBy : j.createdBy?._id;
+    if (!id) continue;
+
+    ids.add(id); // ← This is the key line that marks “this teacher HAS journal entries”
+
+    // If populated, store a pretty label for that ID (overrides other sources later)
+    if (typeof j.createdBy !== 'string') {
+      labelFromJournal.set(id, guruLabel(j.createdBy));
     }
+  }
 
-    for (const g of gurus) {
-      const label = g.name || g.username || g.email || g._id;
-      m.set(g._id, label);
-    }
+  // Build a lookup map from the full teacher list (if available),
+  // so we can resolve labels even when journals.guru is not populated.
+  const labelById = new Map<string, string>();
+  for (const g of gurus) {
+    labelById.set(g._id, guruLabel(g));
+  }
 
-    return Array.from(m, ([id, label]) => ({ id, label }))
-      .sort((a, b) => a.label.localeCompare(b.label, 'id', { sensitivity: 'base' }));
-  }, [jadwals, gurus]);
+  // Build dropdown options ONLY for IDs present in `ids` (i.e., teachers with data).
+  // Label priority: populated label from journals → label from gurus list → fallback to the raw ID.
+  const opts = Array.from(ids).map((id) => ({
+    id,
+    label: labelFromJournal.get(id) || labelById.get(id) || id,
+  }));
+
+  // Sort options by label (case-insensitive, Indonesian locale)
+  return opts.sort((a, b) =>
+    a.label.localeCompare(b.label, 'id', { sensitivity: 'base' })
+  );
+}, [jadwals, gurus]);
 
   const viewJadwals = useMemo(() => {
     if (!selectedCreator) return sortedJadwals;
@@ -298,7 +319,7 @@ const JadwalListingPage = () => {
         <main className="flex-1 p-6">
           <div className="flex items-center mb-6">
             <UsersIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <h1 className="text-2xl font-bold text-gray-800">Jadwal Listing</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Daftar Jadwal</h1>
           </div>
 
           <button
@@ -308,12 +329,12 @@ const JadwalListingPage = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
-            Create New Jadwal
+            Buat Jadwal Baru
           </button>
 
           {/* Filter by creator */}
           <div className="flex items-center gap-2 mb-4">
-            <label htmlFor="creatorFilter" className="text-sm text-gray-600">Filter Created By:</label>
+            <label htmlFor="creatorFilter" className="text-sm text-gray-600">Filter Guru:</label>
             <select
               id="creatorFilter"
               value={selectedCreator ?? ""}

@@ -1,5 +1,4 @@
-// src/pages/ClassDetailPage.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react'; 
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
@@ -30,15 +29,19 @@ const ClassDetailPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [error, setError] = useState('');
 
+  // NEW: state & config pagination untuk daftar siswa
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   useEffect(() => {
     const fetchDetail = async () => {
       try {
         setLoading(true);
-        // LANGSUNG pakai endpoint withsiswa
         const res = await axios.get(`http://localhost:3000/api/withsiswa/${id}`);
         setKelas(res.data.data);
+        setCurrentPage(1); // NEW: reset ke page 1 saat data kelas di-load
       } catch (e) {
         console.error(e);
         setError('Gagal memuat detail kelas');
@@ -55,6 +58,22 @@ const ClassDetailPage = () => {
       year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
     });
   };
+
+  // NEW: hitung data pagination dari kelas.siswa
+  const totalItems = kelas?.siswa?.length ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+
+  const pageItems = useMemo(
+    () => (kelas?.siswa ?? []).slice(startIndex, endIndex),
+    [kelas, startIndex, endIndex]
+  );
+
+  // NEW: clamp currentPage kalau totalPages mengecil (mis. data berubah)
+  useEffect(() => {
+    setCurrentPage((p) => Math.min(p, totalPages));
+  }, [totalPages]);
 
   if (loading) {
     return (
@@ -104,7 +123,7 @@ const ClassDetailPage = () => {
               <ArrowLeftIcon className="h-6 w-6" />
             </Link>
             <UsersIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <h1 className="text-2xl font-bold text-gray-800">Class Details</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Detail Kelas</h1>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -141,22 +160,55 @@ const ClassDetailPage = () => {
               <div className="mt-8 pt-4 border-t">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">Siswa di Kelas Ini</h2>
 
-                {kelas.siswa.length === 0 ? (
+                {totalItems === 0 ? (
                   <p className="text-sm text-gray-600">Belum ada siswa.</p>
                 ) : (
-                  <ul className="divide-y divide-gray-100">
-                    {kelas.siswa.map((s) => (
-                      <li key={s._id} className="py-3 flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{s.nama}</p>
-                          <p className="text-xs text-gray-500">NIS: {s.nis} • {s.jenisKelamin}</p>
-                        </div>
-                        <Link to={`/student/${s._id}`} className="text-blue-500 hover:text-blue-700 text-sm">
-                          Detail
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <ul className="divide-y divide-gray-100">
+                      {pageItems.map((s) => (
+                        <li key={s._id} className="py-3 flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{s.nama}</p>
+                            <p className="text-xs text-gray-500">NIS: {s.nis} • {s.jenisKelamin}</p>
+                          </div>
+                          <Link to={`/student/${s._id}`} className="text-blue-500 hover:text-blue-700 text-sm">
+                            Detail
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* NEW: pagination controls */}
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="text-sm text-gray-600">
+                        Showing <span className="font-medium">{startIndex + 1}</span>–
+                        <span className="font-medium">{endIndex}</span> of{' '}
+                        <span className="font-medium">{totalItems}</span> students
+                      </div>
+
+                      <div className="inline-flex items-center gap-1">
+                        <button
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                          className="px-3 py-1.5 border rounded-md text-sm disabled:opacity-50 bg-white hover:bg-gray-50"
+                        >
+                          Prev
+                        </button>
+
+                        <span className="px-3 py-1.5 text-sm text-gray-600">
+                          Page {currentPage} / {totalPages}
+                        </span>
+
+                        <button
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages}
+                          className="px-3 py-1.5 border rounded-md text-sm disabled:opacity-50 bg-white hover:bg-gray-50"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
 

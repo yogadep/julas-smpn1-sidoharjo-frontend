@@ -133,7 +133,7 @@ const MapelDetailPage = () => {
       if (response.data.success) {
         alert('Mapel berhasil dihapus');
         // Redirect manual: balik ke list mapel
-        window.location.href = '/mapels';
+        window.location.href = '/subjects';
       } else {
         alert(`Gagal menghapus mapel: ${response.data.message}`);
       }
@@ -219,11 +219,11 @@ const MapelDetailPage = () => {
         {/* Content */}
         <main className="flex-1 p-6">
           <div className="flex items-center mb-6">
-            <Link to="/mapels" className="mr-3 text-blue-500 hover:text-blue-700">
+            <Link to="/subjects" className="mr-3 text-blue-500 hover:text-blue-700">
               <ArrowLeftIcon className="h-6 w-6" />
             </Link>
             <UsersIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <h1 className="text-2xl font-bold text-gray-800">Mapel Details</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Detail Mata Pelajaran</h1>
 
             <button
               onClick={() => handleOpenUpdateModal(mapel)}

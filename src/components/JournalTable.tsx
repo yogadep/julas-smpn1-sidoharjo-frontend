@@ -115,7 +115,7 @@ const JurnalTable = ({
   };
 
   return (
-    <Table headers={['Guru', 'Kelas', 'Mapel', 'Jam', 'Materi', 'Created', 'Updated', 'Actions']}>
+    <Table headers={['Guru', 'Kelas', 'Mapel', 'Jam', 'Materi', 'Actions']}>
       {jurnalList.map((j) => (
         <tr key={j._id}>
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{guruLabel(j.guru)}</td>
@@ -126,8 +126,8 @@ const JurnalTable = ({
           {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{siswaArrayLabel(j.siswaTidakHadir)}</td>
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{siswaArrayLabel(j.siswaIzin)}</td>
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{siswaArrayLabel(j.siswaSakit)}</td> */}
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fmt(j.createdAt)}</td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fmt(j.updatedAt)}</td>
+          {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fmt(j.createdAt)}</td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fmt(j.updatedAt)}</td> */}
           <td className="px-6 py-4 whitespace-nowrap text-sm">
             <Link to={`/journal/${j._id}`} className="text-blue-500 hover:text-blue-700 mr-3">
               Detail

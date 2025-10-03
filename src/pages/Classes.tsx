@@ -220,7 +220,7 @@ const UserListingPage = () => {
         <main className="flex-1 p-6">
           <div className="flex items-center mb-6">
             <UsersIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <h1 className="text-2xl font-bold text-gray-800">Classes Listing</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Daftar Kelas</h1>
           </div>
 
           <button
@@ -235,7 +235,7 @@ const UserListingPage = () => {
               >
                 <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
-              Create New Class
+              Tambah Kelas Baru
             </button>
             <br />
 

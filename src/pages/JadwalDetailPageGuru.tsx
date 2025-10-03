@@ -268,7 +268,7 @@ const JadwalDetailPage = () => {
               <ArrowLeftIcon className="h-6 w-6" />
             </Link>
             <CalendarDaysIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <h1 className="text-2xl font-bold text-gray-800">Jadwal Details</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Detail Jadwal Pelajaran</h1>
 
             <button
               onClick={() => handleOpenUpdateModal(jadwal)}

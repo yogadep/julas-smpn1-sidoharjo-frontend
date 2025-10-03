@@ -181,7 +181,7 @@ const StudentListingPage = () => {
         <main className="flex-1 p-6">
           <div className="flex items-center mb-6">
             <UsersIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <h1 className="text-2xl font-bold text-gray-800">Student Listing</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Daftar Siswa</h1>
           </div>
 
           {/* NEW: Filter kelas di atas tabel */}

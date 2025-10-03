@@ -48,10 +48,20 @@ const labelKelas = (k?: Jurnal['kelas']) => {
   if (!k) return '—';
   return typeof k === 'string' ? k : (k.namaKelas || k._id);
 };
+
 const labelMapel = (m?: Jurnal['mapel']) => {
   if (!m) return '—';
   return typeof m === 'string' ? m : (m.namaMapel || m._id);
 };
+
+// const labelMapel = (m?: Jurnal['mapel']) => {
+//   if (!m) return '—';
+//   // return typeof m === 'string' ? m : (m.namaMapel || m._id);
+//   if (typeof m === 'object' && 'namaMapel' in m) return m.namaMapel;
+//   return '-'
+// }
+
+
 const labelSiswaArr = (arr?: Array<string | SiswaLite>) => {
   if (!arr || arr.length === 0) return '—';
   return arr.map(s => (typeof s === 'string' ? s : (s.nama || s._id))).join(', ');
