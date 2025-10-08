@@ -1,0 +1,6 @@
+{
+    "buildCommand": "tsc -b --skipLibCheck && vite build",
+    "outputDirectory": "dist",
+    "devCommand": "vite dev",
+    "installCommand": "npm install"
+  }
