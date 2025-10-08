@@ -12,7 +12,7 @@ const LoginForm = () => {
   // const handleLogin = async (e: React.FormEvent) => {
   //   e.preventDefault();
   //   try {
-  //     const response = await axios.post('http://localhost:3000/api/login', { 
+  //     const response = await axios.post('https://julas-smpn1-sidoharjo-backend.vercel.app/api/login', { 
   //       username, 
   //       password 
   //     });
@@ -35,7 +35,7 @@ const LoginForm = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:3000/api/login', { username, password });
+      const { data } = await axios.post('https://julas-smpn1-sidoharjo-backend.vercel.app/api/login', { username, password });
       if (data?.success) {
         const { token, user } = data.data;
         console.log('User login:', user);

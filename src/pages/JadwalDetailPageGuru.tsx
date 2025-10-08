@@ -101,12 +101,12 @@ const JadwalDetailPage = () => {
         setLoading(true);
 
         // detail jadwal
-        const jd = await axios.get(`http://localhost:3000/api/getjadwal/${id}`);
+        const jd = await axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/getjadwal/${id}`);
 
         // dropdowns
         const [clsRes, mpRes] = await Promise.all([
-          axios.get('http://localhost:3000/api/getkelas'),
-          axios.get('http://localhost:3000/api/getmapels'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getkelas'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getmapels'),
         ]);
 
         setJadwal(jd.data.data);
@@ -161,7 +161,7 @@ const JadwalDetailPage = () => {
       };
 
       const res = await axios.put(
-        `http://localhost:3000/api/updatejadwal/${selectedJadwal._id}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/updatejadwal/${selectedJadwal._id}`,
         updateData,
         { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
       );
@@ -193,7 +193,7 @@ const JadwalDetailPage = () => {
       if (!token) return alert('Anda harus login terlebih dahulu');
 
       const res = await axios.delete(
-        `http://localhost:3000/api/deletejadwal/${jadwalId}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/deletejadwal/${jadwalId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

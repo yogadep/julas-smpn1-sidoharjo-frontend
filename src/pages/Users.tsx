@@ -46,7 +46,7 @@ const UserListingPage = () => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:3000/api/getusers');
+        const response = await axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getusers');
         setUsers(response.data.data);
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -112,7 +112,7 @@ const UserListingPage = () => {
   
       console.log('Data yang akan dikirim:', requestData); // Debug log
   
-      const response = await axios.post('http://localhost:3000/api/adduser', requestData, {
+      const response = await axios.post('https://julas-smpn1-sidoharjo-backend.vercel.app/api/adduser', requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -176,7 +176,7 @@ const UserListingPage = () => {
       };
   
       const response = await axios.put(
-        `http://localhost:3000/api/updateuser/${selectedUser._id}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/updateuser/${selectedUser._id}`,
         updateData,
         {
           headers: {
@@ -269,7 +269,7 @@ const UserListingPage = () => {
         return;
       }
   
-      const response = await axios.delete(`http://localhost:3000/api/deleteuser/${userId}`, {
+      const response = await axios.delete(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/deleteuser/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -293,7 +293,7 @@ const UserListingPage = () => {
 
   const fetchMapels = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/getmapels');
+      const response = await axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getmapels');
       setMapels(response.data.data);
     } catch (error) {
       console.error('Error fetching mapels:', error);

@@ -49,8 +49,8 @@ const StudentListingPage = () => {
     setLoading(true);
     try {
       const [clsRes, stdRes] = await Promise.all([
-        axios.get('http://localhost:3000/api/getkelas'),
-        axios.get('http://localhost:3000/api/getstudents'),
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getkelas'),
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getstudents'),
       ]);
       setClasses(clsRes.data.data || []);
       setStudents(stdRes.data.data || []);
@@ -86,7 +86,7 @@ const StudentListingPage = () => {
         jenisKelamin: formData.jenisKelamin,
       };
 
-      const res = await axios.post('http://localhost:3000/api/addstudent', payload, {
+      const res = await axios.post('https://julas-smpn1-sidoharjo-backend.vercel.app/api/addstudent', payload, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 

@@ -91,13 +91,13 @@ const DashboardPage = () => {
 
       try {
         const [usersResponse, jurnalRes, jadwalRes] = await Promise.all([
-          axios.get('http://localhost:3000/api/getusers', {
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getusers', {
             // headers: { Authorization: `Bearer ${token}` },
           }).catch(() => ({ data: { data: [] } })),
-          axios.get(`http://localhost:3000/api/getjurnalbyguru/${me._id}`, {
+          axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/getjurnalbyguru/${me._id}`, {
             // headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`http://localhost:3000/api/getjadwalbyguru/${me._id}`, {
+          axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/getjadwalbyguru/${me._id}`, {
             // headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -119,7 +119,7 @@ const DashboardPage = () => {
             const ids = Array.from(mapelIdSet);
             const results = await Promise.all(
               ids.map(id =>
-                axios.get(`http://localhost:3000/api/mapel/${id}`)
+                axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/mapel/${id}`)
                   .then(res => ({ id, nama: res.data?.data?.namaMapel || res.data?.data?.nama || id }))
                   .catch(() => ({ id, nama: id })) // fallback kalau error
               )

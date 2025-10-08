@@ -119,14 +119,14 @@ const JurnalDetailPage = () => {
         setLoading(true);
 
         // detail jurnal
-        const jr = await axios.get(`http://localhost:3000/api/getjurnal/${id}`);
+        const jr = await axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/getjurnal/${id}`);
 
         // dropdowns (kalau endpoint guru khusus ga ada, sesuaikan)
         const [clsRes, mpRes, stdRes, guruRes] = await Promise.all([
-          axios.get('http://localhost:3000/api/getkelas'),
-          axios.get('http://localhost:3000/api/getmapels'),
-          axios.get('http://localhost:3000/api/getstudents'),
-          axios.get('http://localhost:3000/api/getusers?role=guru').catch(() => ({ data: { data: [] } })),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getkelas'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getmapels'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getstudents'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getusers?role=guru').catch(() => ({ data: { data: [] } })),
         ]);
 
         setJurnal(jr.data.data);
@@ -214,7 +214,7 @@ const JurnalDetailPage = () => {
       };
 
       const response = await axios.put(
-        `http://localhost:3000/api/updatejurnal/${selectedJurnal._id}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/updatejurnal/${selectedJurnal._id}`,
         updateData,
         {
           headers: {
@@ -251,7 +251,7 @@ const JurnalDetailPage = () => {
       }
 
       const response = await axios.delete(
-        `http://localhost:3000/api/deletejurnal/${jurnalId}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/deletejurnal/${jurnalId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

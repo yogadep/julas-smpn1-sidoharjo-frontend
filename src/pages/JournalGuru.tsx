@@ -182,10 +182,10 @@ const JournalListingPage = () => {
     setLoading(true);
     try {
       const [clsRes, mpRes, jrRes, stdRes] = await Promise.all([
-        axios.get('http://localhost:3000/api/getkelas'),
-        axios.get('http://localhost:3000/api/getmapels'),
-        axios.get(`http://localhost:3000/api/getjurnalbyguru/${userId}`),
-        axios.get('http://localhost:3000/api/getstudents'),
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getkelas'),
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getmapels'),
+        axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/getjurnalbyguru/${userId}`),
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getstudents'),
       ]);
 
       setClasses(clsRes.data.data || []);
@@ -272,7 +272,7 @@ const JournalListingPage = () => {
         catatan: formData.catatan || undefined,
       };
 
-      const res = await axios.post('http://localhost:3000/api/addjurnal', payload, {
+      const res = await axios.post('https://julas-smpn1-sidoharjo-backend.vercel.app/api/addjurnal', payload, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 
@@ -337,7 +337,7 @@ const JournalListingPage = () => {
       };
 
       const res = await axios.put(
-        `http://localhost:3000/api/updatejurnal/${selectedJournal._id}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/updatejurnal/${selectedJournal._id}`,
         updateData,
         { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
       );

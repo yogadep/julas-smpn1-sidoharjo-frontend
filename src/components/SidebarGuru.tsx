@@ -52,7 +52,7 @@ const Sidebar = () => {
    const handleLogout = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:3000/api/logout', {}, {
+      await axios.post('https://julas-smpn1-sidoharjo-backend.vercel.app/api/logout', {}, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
     } catch (err) {

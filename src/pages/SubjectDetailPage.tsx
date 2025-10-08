@@ -36,7 +36,7 @@ const MapelDetailPage = () => {
       try {
         setLoading(true);
         // asumsi endpoint mengembalikan 1 mapel berdasarkan id
-        const subjectResponse = await axios.get(`http://localhost:3000/api/getmapel/${id}`);
+        const subjectResponse = await axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/getmapel/${id}`);
         setMapel(subjectResponse.data.data);
       } catch (err) {
         console.error('Error fetching mapel:', err);
@@ -87,7 +87,7 @@ const MapelDetailPage = () => {
       };
 
       const response = await axios.put(
-        `http://localhost:3000/api/updatemapel/${selectedMapel._id}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/updatemapel/${selectedMapel._id}`,
         updateData,
         {
           headers: {
@@ -124,7 +124,7 @@ const MapelDetailPage = () => {
       }
 
       const response = await axios.delete(
-        `http://localhost:3000/api/deletemapel/${mapelId}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/deletemapel/${mapelId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

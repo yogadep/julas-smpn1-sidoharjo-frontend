@@ -83,12 +83,12 @@ const DashboardPage = () => {
 
       try {
         const [usersRes, jadwalRes, kelasRes, jurnalRes, siswaRes, mapelRes] = await Promise.all([
-          axios.get('http://localhost:3000/api/getusers'),
-          axios.get('http://localhost:3000/api/getjadwals'),
-          axios.get('http://localhost:3000/api/getkelas'),
-          axios.get('http://localhost:3000/api/getjurnal'),
-          axios.get('http://localhost:3000/api/getstudents'),
-          axios.get('http://localhost:3000/api/getmapels'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getusers'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getjadwals'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getkelas'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getjurnal'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getstudents'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getmapels'),
         ]);
 
         // console.log('User data:', usersRes.data);

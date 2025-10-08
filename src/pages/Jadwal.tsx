@@ -72,11 +72,11 @@ const JadwalListingPage = () => {
     setLoading(true);
     try {
       const [clsRes, mpRes, jdRes, guruRes] = await Promise.all([
-        axios.get('http://localhost:3000/api/getkelas'),
-        axios.get('http://localhost:3000/api/getmapels'),
-        axios.get('http://localhost:3000/api/getjadwals'),
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getkelas'),
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getmapels'),
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getjadwals'),
         // NEW: ambil semua user role guru untuk dropdown
-        axios.get('http://localhost:3000/api/getusers?role=guru').catch(() => ({ data: { data: [] } })),
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getusers?role=guru').catch(() => ({ data: { data: [] } })),
       ]);
 
       setClasses(clsRes.data.data || []);
@@ -117,7 +117,7 @@ const JadwalListingPage = () => {
         createdBy: formData.createdBy || undefined, // NEW: kirim createdBy dari pilihan admin
       };
 
-      const res = await axios.post('http://localhost:3000/api/addjadwal', payload, {
+      const res = await axios.post('https://julas-smpn1-sidoharjo-backend.vercel.app/api/addjadwal', payload, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 
@@ -168,7 +168,7 @@ const JadwalListingPage = () => {
       };
 
       const res = await axios.put(
-        `http://localhost:3000/api/updatejadwal/${selectedJadwal._id}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/updatejadwal/${selectedJadwal._id}`,
         updateData,
         { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
       );

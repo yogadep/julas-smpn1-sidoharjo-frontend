@@ -47,8 +47,8 @@ const StudentDetailPage = () => {
         setLoading(true);
 
         const [studentRes, classesRes] = await Promise.all([
-          axios.get(`http://localhost:3000/api/getstudent/${id}`),
-          axios.get('http://localhost:3000/api/getkelas'),
+          axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/getstudent/${id}`),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getkelas'),
         ]);
 
         setStudent(studentRes.data.data);
@@ -109,7 +109,7 @@ const StudentDetailPage = () => {
       };
 
       const response = await axios.put(
-        `http://localhost:3000/api/updatestudent/${selectedStudent._id}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/updatestudent/${selectedStudent._id}`,
         updateData,
         {
           headers: {
@@ -146,7 +146,7 @@ const StudentDetailPage = () => {
       }
 
       const response = await axios.delete(
-        `http://localhost:3000/api/deletestudent/${studentId}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/deletestudent/${studentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

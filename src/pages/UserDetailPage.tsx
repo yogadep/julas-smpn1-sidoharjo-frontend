@@ -51,9 +51,9 @@ const UserDetailPage = () => {
       try {
         setLoading(true);
         const [userResponse, mapelsResponse, classResponse] = await Promise.all([
-          axios.get(`http://localhost:3000/api/getuser/${id}`),
-          axios.get('http://localhost:3000/api/getmapels'),
-          axios.get('http://localhost:3000/api/getkelas'),
+          axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/getuser/${id}`),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getmapels'),
+          axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getkelas'),
         ]);
         
         setUser(userResponse.data.data);
@@ -145,7 +145,7 @@ const UserDetailPage = () => {
       };
   
       const response = await axios.put(
-        `http://localhost:3000/api/updateuser/${selectedUser._id}`,
+        `https://julas-smpn1-sidoharjo-backend.vercel.app/api/updateuser/${selectedUser._id}`,
         updateData,
         {
           headers: {
@@ -200,7 +200,7 @@ const UserDetailPage = () => {
         return;
       }
   
-      const response = await axios.delete(`http://localhost:3000/api/deleteuser/${userId}`, {
+      const response = await axios.delete(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/deleteuser/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

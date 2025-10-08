@@ -83,9 +83,9 @@ const JadwalListingPage = () => {
       // }
   
       const [clsRes, mpRes, jdRes] = await Promise.all([
-        axios.get('http://localhost:3000/api/getkelas'),
-        axios.get('http://localhost:3000/api/getmapels'),
-        axios.get(`http://localhost:3000/api/getjadwalbyguru/${me._id}`, {
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getkelas'),
+        axios.get('https://julas-smpn1-sidoharjo-backend.vercel.app/api/getmapels'),
+        axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/getjadwalbyguru/${me._id}`, {
           // headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -129,7 +129,7 @@ const JadwalListingPage = () => {
         mapel: formData.mapel ? formData.mapel : null, 
       };
 
-      const res = await axios.post('http://localhost:3000/api/addjadwal', payload, {
+      const res = await axios.post('https://julas-smpn1-sidoharjo-backend.vercel.app/api/addjadwal', payload, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 
@@ -176,7 +176,7 @@ const JadwalListingPage = () => {
         _id: selectedJadwal._id,
       };
 
-      const res = await axios.put(`http://localhost:3000/api/updatejadwal/${selectedJadwal._id}`, updateData, {
+      const res = await axios.put(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/updatejadwal/${selectedJadwal._id}`, updateData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 

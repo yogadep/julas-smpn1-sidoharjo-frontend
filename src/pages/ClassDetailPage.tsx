@@ -39,7 +39,7 @@ const ClassDetailPage = () => {
     const fetchDetail = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:3000/api/withsiswa/${id}`);
+        const res = await axios.get(`https://julas-smpn1-sidoharjo-backend.vercel.app/api/withsiswa/${id}`);
         setKelas(res.data.data);
         setCurrentPage(1); // NEW: reset ke page 1 saat data kelas di-load
       } catch (e) {
